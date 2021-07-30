@@ -10,6 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navArgument
 import androidx.navigation.compose.rememberNavController
+import com.lintang.pokedexjetpackcomposemvvm.pokelist.PokeListPage
 import com.lintang.pokedexjetpackcomposemvvm.ui.theme.PokedexJetpackComposeMVVMTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -22,7 +23,7 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 NavHost(navController = navController, startDestination = "pokemon_list_page") {
                     composable("pokemon_list_page") {
-
+                        PokeListPage( navController)
                     }
                     composable("pokemon_detail_page/{dominantColor}/pokemonName",
                         arguments = listOf(
@@ -46,5 +47,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+
 }
 

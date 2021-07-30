@@ -9,22 +9,22 @@ import javax.inject.Inject
 
 
 @ActivityScoped
-class PokeRepo  @Inject constructor(private  val pokeApi: PokeApi) {
+class PokeRepo @Inject constructor(private val pokeApi: PokeApi) {
 
-suspend fun  getPokemons(limit:Int,offset:Int):Resource<PokeList> =
-    try {
-       val data= pokeApi.getPokemons(limit = limit,offset = offset)
-        Resource.Success(data)
-    }catch (throwable:Throwable){
-        Resource.Error<PokeList>(throwable)
-    }
-
-
-    suspend fun  getPokemonByName(name:String):Resource<Pokemon> =
+    suspend fun getPokemons(limit: Int, offset: Int): Resource<PokeList> =
         try {
-            val data= pokeApi.getPokemonByName(name)
+            val data = pokeApi.getPokemons(limit = limit, offset = offset)
             Resource.Success(data)
-        }catch (throwable:Throwable){
+        } catch (throwable: Throwable) {
+            Resource.Error<PokeList>(throwable)
+        }
+
+
+    suspend fun getPokemonByName(name: String): Resource<Pokemon> =
+        try {
+            val data = pokeApi.getPokemonByName(name)
+            Resource.Success(data)
+        } catch (throwable: Throwable) {
             Resource.Error(throwable)
         }
 

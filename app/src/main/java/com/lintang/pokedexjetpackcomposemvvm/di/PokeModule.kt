@@ -1,7 +1,6 @@
 package com.lintang.pokedexjetpackcomposemvvm.di
 
 
-
 import com.lintang.pokedexjetpackcomposemvvm.data.network.PokeApi
 import com.lintang.pokedexjetpackcomposemvvm.util.Constant.BASE_URL
 import dagger.Module
@@ -18,9 +17,9 @@ object PokeModule {
 
     @Provides
     @Singleton
-    fun provideApi():PokeApi=Retrofit.Builder().baseUrl(BASE_URL).
-    addConverterFactory(GsonConverterFactory.create()).build().create(PokeApi::class.java)
-
+    fun provideApi(): PokeApi =
+        Retrofit.Builder().baseUrl(BASE_URL).addConverterFactory(GsonConverterFactory.create())
+            .build().create(PokeApi::class.java)
 
 
 }
