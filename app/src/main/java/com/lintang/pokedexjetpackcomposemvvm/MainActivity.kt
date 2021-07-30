@@ -25,7 +25,7 @@ class MainActivity : ComponentActivity() {
                     composable("pokemon_list_page") {
                         PokeListPage( navController)
                     }
-                    composable("pokemon_detail_page/{dominantColor}/pokemonName",
+                    composable("pokemon_detail_page/{dominantColor}/{pokemonName}",
                         arguments = listOf(
                             navArgument("dominantColor") {
                                 type = NavType.IntType
