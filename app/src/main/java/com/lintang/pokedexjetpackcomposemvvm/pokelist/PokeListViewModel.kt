@@ -58,7 +58,7 @@ class PokeListViewModel @Inject constructor(private val repo: PokeRepo) : ViewMo
     }
     fun  getPokemons()= viewModelScope.launch {
         isLoad.value=true
-        val result =repo.getPokemons(limit = PAGE_SIZE,offset = curPage)
+        val result =repo.getPokemons(limit = PAGE_SIZE,offset = curPage* PAGE_SIZE)
         when(result){
             is  Resource.Error->{
                 loadError.value=result.throwable?.localizedMessage?:"Unknown Error"
@@ -78,7 +78,7 @@ class PokeListViewModel @Inject constructor(private val repo: PokeRepo) : ViewMo
                         val imgUrl="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${number}.png"
                         PokeEntry(item.name,imgUrl,number.toInt())
                     }
-                    curPage+= PAGE_SIZE
+                    curPage++
                     loadError.value=""
                     isLoad.value=false
                     pokeList.value+=entries
