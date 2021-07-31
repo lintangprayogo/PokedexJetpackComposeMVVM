@@ -1,5 +1,7 @@
 package com.lintang.pokedexjetpackcomposemvvm.pokelist
 
+
+import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -8,9 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
@@ -30,12 +30,14 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
+import coil.bitmap.BitmapPool
 import coil.compose.rememberImagePainter
-import coil.transform.CircleCropTransformation
-
+import coil.size.Size
+import coil.transform.Transformation
 import com.lintang.pokedexjetpackcomposemvvm.R
 import com.lintang.pokedexjetpackcomposemvvm.data.models.PokeEntry
 import com.lintang.pokedexjetpackcomposemvvm.ui.theme.RobotoCondensed
+
 
 
 @Composable
@@ -48,7 +50,6 @@ fun PokeListPage(navController: NavController) {
             Spacer(modifier = Modifier.height(20.dp))
             Row(
                 Modifier.align(CenterHorizontally), verticalAlignment = Alignment.CenterVertically
-
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.ic_pokeball),
@@ -118,6 +119,7 @@ fun SearchBar(modifier: Modifier, hint: String, onSearch: (String) -> Unit = {})
 
 }
 
+@ExperimentalCoilApi
 @Composable
 fun PokeList(  navController: NavController,viewModel: PokeListViewModel= hiltViewModel()){
 
@@ -138,8 +140,20 @@ fun PokeList(  navController: NavController,viewModel: PokeListViewModel= hiltVi
             }
             PokedexContent(rowIndex = it, entries = entries , navController =navController)
         }
+    }
 
-
+    Box(
+        contentAlignment = Center,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        if(isLoad) {
+            CircularProgressIndicator(color = MaterialTheme.colors.primary)
+        }
+        if(loadError.isNotEmpty()) {
+            RetrySection(error = loadError) {
+                viewModel.getPokemons()
+            }
+        }
     }
 }
 
@@ -160,7 +174,7 @@ fun PokedexEntry(
     Box(
         contentAlignment = Center,
         modifier = modifier
-            .shadow(5.dp, shape = RoundedCornerShape(10.dp))
+            .shadow(5.dp, RoundedCornerShape(10.dp))
             .clip(RoundedCornerShape(10.dp))
             .aspectRatio(1f)
             .background(
@@ -176,55 +190,85 @@ fun PokedexEntry(
             }
     ) {
         Column {
-
-            Image(
+             Image(
                 painter = rememberImagePainter(
                     data = pokeEntry.imageUrl,
                     builder = {
-                        crossfade(true)
+                        error(R.drawable.ic_error)
+                        placeholder(R.drawable.ic_pokeball)
+                        transformations(object: Transformation {
+                            override fun key(): String {
+                                return pokeEntry.imageUrl
+                            }
+                            override suspend fun transform(
+                                pool: BitmapPool,
+                                input: Bitmap,
+                                size: Size
+                            ): Bitmap {
+
+                                viewModel.calcDominantColor(input) { color ->
+                                    dominantColor = color
+                                }
+                                return input
+                            }
+                        })
                     }
-
                 ),
-
                 contentDescription = pokeEntry.name,
                 modifier = Modifier
                     .size(120.dp)
                     .align(CenterHorizontally)
-
             )
-
             Text(
                 text = pokeEntry.name, fontFamily = RobotoCondensed, fontSize = 20.sp,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
+
+
         }
     }
 
 }
 
 
+@ExperimentalCoilApi
 @Composable
-fun PokedexContent(rowIndex:Int,entries:List< PokeEntry>,navController: NavController){
-    Column {
-        Row {
+fun PokedexContent(rowIndex:Int,entries:List< PokeEntry>,navController: NavController) = Column {
+    Row {
+        PokedexEntry(
+            pokeEntry = entries[rowIndex * 2],
+            navController = navController,
+            modifier = Modifier.weight(1f)
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        if(entries.size >= rowIndex * 2 + 2) {
             PokedexEntry(
-                pokeEntry = entries[rowIndex * 2],
+                pokeEntry = entries[rowIndex * 2 + 1],
                 navController = navController,
                 modifier = Modifier.weight(1f)
             )
-            Spacer(modifier = Modifier.width(16.dp))
-            if(entries.size >= rowIndex * 2 + 2) {
-                PokedexEntry(
-                    pokeEntry = entries[rowIndex * 2 + 1],
-                    navController = navController,
-                    modifier = Modifier.weight(1f)
-                )
-            } else {
-                Spacer(modifier = Modifier.weight(1f))
-            }
+        } else {
+            Spacer(modifier = Modifier.weight(1f))
         }
-        Spacer(modifier = Modifier.height(16.dp))
     }
+    Spacer(modifier = Modifier.height(16.dp))
+}
 
+
+@Composable
+fun RetrySection(
+    error: String,
+    onRetry: () -> Unit
+) {
+    Column {
+        Text(error, color = Color.Red, fontSize = 18.sp)
+        Spacer(modifier = Modifier.height(8.dp))
+        Button(
+            onClick = { onRetry() },
+            modifier = Modifier.align(CenterHorizontally)
+        ) {
+            Text(text = "Retry")
+        }
+    }
 }

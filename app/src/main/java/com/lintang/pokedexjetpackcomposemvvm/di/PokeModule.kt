@@ -19,13 +19,11 @@ object PokeModule {
 
     @Provides
     @Singleton
-    @JvmStatic
     fun provideApi():PokeApi=Retrofit.Builder().baseUrl(BASE_URL).
     addConverterFactory(GsonConverterFactory.create()).build().create(PokeApi::class.java)
 
     @Provides
     @Singleton
-    @JvmStatic
     fun provideRepo(pokeApi: PokeApi):PokeRepo=PokeRepo(pokeApi)
 
 }
