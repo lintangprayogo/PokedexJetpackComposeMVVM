@@ -25,7 +25,6 @@ private val LightColorPalette = lightColors(
 )
 
 
-
 @Composable
 fun PokedexJetpackComposeMVVMTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),

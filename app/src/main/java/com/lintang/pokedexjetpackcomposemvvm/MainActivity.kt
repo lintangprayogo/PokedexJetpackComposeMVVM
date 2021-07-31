@@ -23,9 +23,9 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 NavHost(navController = navController, startDestination = "pokemon_list_page") {
                     composable("pokemon_list_page") {
-                        PokeListPage( navController)
+                        PokeListPage(navController)
                     }
-                    composable("pokemon_detail_page/{dominantColor}/pokemonName",
+                    composable("pokemon_detail_page/{dominantColor}/{pokemonName}",
                         arguments = listOf(
                             navArgument("dominantColor") {
                                 type = NavType.IntType
