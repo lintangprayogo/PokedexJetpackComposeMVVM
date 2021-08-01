@@ -1,5 +1,7 @@
 package com.lintang.pokedexjetpackcomposemvvm.pokedetail
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -10,9 +12,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.produceState
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,6 +34,8 @@ import com.lintang.pokedexjetpackcomposemvvm.R
 import com.lintang.pokedexjetpackcomposemvvm.data.network.response.Pokemon
 import com.lintang.pokedexjetpackcomposemvvm.data.network.response.Type
 import com.lintang.pokedexjetpackcomposemvvm.util.Resource
+import com.lintang.pokedexjetpackcomposemvvm.util.parseStatToAbbr
+import com.lintang.pokedexjetpackcomposemvvm.util.parseStatToColor
 import com.lintang.pokedexjetpackcomposemvvm.util.parseTypeToColor
 import java.lang.Math.round
 
@@ -141,7 +143,10 @@ fun PokemonContentInfo(
     when (pokemonInfo) {
         is Resource.Success -> {
             if (pokemonInfo.data != null) {
-                PokeDetailSection(pokemon = pokemonInfo.data, modifier = modifier.offset(y=-20.dp))
+                PokeDetailSection(
+                    pokemon = pokemonInfo.data,
+                    modifier = modifier.offset(y = -20.dp)
+                )
 
             } else {
                 Text(
@@ -181,11 +186,12 @@ fun PokeDetailSection(pokemon: Pokemon, modifier: Modifier = Modifier) {
         Text(
             text = "#${pokemon.id} ${pokemon.name.capitalize(Locale.current)}",
             fontWeight = FontWeight.Bold,
-            fontSize=30.sp,
+            fontSize = 30.sp,
             color = MaterialTheme.colors.onSurface
         )
         PokeTypeSection(types = pokemon.types)
-        PokeSizeSection(weight = pokemon.weight, height =pokemon.height )
+        PokeSizeSection(weight = pokemon.weight, height = pokemon.height)
+        PokeStatContent(pokemonInfo = pokemon)
 
     }
 }
@@ -215,34 +221,36 @@ fun PokeTypeSection(types: List<Type>) {
 }
 
 @Composable
-fun PokeSizeSection(weight: Int,height:Int,sectionHeight:Dp=80.dp) {
+fun PokeSizeSection(weight: Int, height: Int, sectionHeight: Dp = 80.dp) {
 
-        val pokemonWeightInKg = remember {
-            round(weight * 100f) / 1000f
-        }
-        val pokemonHeightInMeters = remember {
-            round(height * 100f) / 1000f
-        }
-        Row(
+    val pokemonWeightInKg = remember {
+        round(weight * 100f) / 1000f
+    }
+    val pokemonHeightInMeters = remember {
+        round(height * 100f) / 1000f
+    }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        PokeSizeItemSection(
+            dataValue = pokemonWeightInKg,
+            dataUnit = "kg",
+            dataIcon = painterResource(id = R.drawable.ic_weight),
+            modifier = Modifier.weight(1f)
+        )
+        Spacer(
             modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            PokeSizeItemSection(
-                dataValue = pokemonWeightInKg,
-                dataUnit = "kg",
-                dataIcon = painterResource(id = R.drawable.ic_weight),
-                modifier = Modifier.weight(1f)
-            )
-            Spacer(modifier = Modifier
                 .size(1.dp, sectionHeight)
-                .background(Color.LightGray))
-            PokeSizeItemSection(
-                dataValue = pokemonHeightInMeters,
-                dataUnit = "m",
-                dataIcon = painterResource(id = R.drawable.ic_height),
-                modifier = Modifier.weight(1f)
-            )
-        }
+                .background(Color.LightGray)
+        )
+        PokeSizeItemSection(
+            dataValue = pokemonHeightInMeters,
+            dataUnit = "m",
+            dataIcon = painterResource(id = R.drawable.ic_height),
+            modifier = Modifier.weight(1f)
+        )
+    }
 
 
 }
@@ -257,11 +265,94 @@ fun PokeSizeItemSection(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
-        modifier = modifier) {
-        Icon(painter = dataIcon,contentDescription = null,tint =  MaterialTheme.colors.onSurface)
+        modifier = modifier
+    ) {
+        Icon(painter = dataIcon, contentDescription = null, tint = MaterialTheme.colors.onSurface)
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "$dataValue$dataUnit",color = MaterialTheme.colors.onSurface)
+        Text(text = "$dataValue$dataUnit", color = MaterialTheme.colors.onSurface)
 
+    }
+}
+
+@Composable
+fun PokeStat(
+    statName: String,
+    statValue: Int,
+    statMaxValue: Int,
+    statColor: Color,
+    height: Dp = 28.dp,
+    animDuration: Int = 1000,
+    animDelay: Int = 0
+) {
+    var isanimationPlayed by remember { mutableStateOf(false) }
+    val curentPercent = animateFloatAsState(
+        targetValue = if (isanimationPlayed) {
+            statValue / statMaxValue.toFloat()
+        } else {
+            0f
+        }, animationSpec = tween(animDuration, animDelay)
+    )
+
+    LaunchedEffect(key1 = true)
+    {
+        isanimationPlayed = true
+
+    }
+
+    Box(
+        modifier = Modifier
+            .height(height = height)
+            .fillMaxWidth()
+            .clip(CircleShape)
+            .background(
+                if (isSystemInDarkTheme()) {
+                    Color(0xFF505050)
+                } else {
+                    Color.LightGray
+                }
+            )
+    ) {
+       Row(horizontalArrangement = Arrangement.SpaceBetween,
+           verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+              .fillMaxHeight()
+              .fillMaxWidth(curentPercent.value)
+              .clip(CircleShape)
+              .background(statColor)
+              .padding(horizontal = 8.dp)
+           ) {
+           Text(text = statName,fontWeight = FontWeight.Bold)
+           Text(text = "${(statMaxValue*curentPercent.value).toInt()}",fontWeight = FontWeight.Bold)
+
+       }
+    }
+}
+
+@Composable
+fun PokeStatContent(pokemonInfo: Pokemon,animDelayPerItem: Int=100){
+  val maxBaseStat = remember { pokemonInfo.stats.maxOf { it.baseStat } }
+
+    Column(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text(
+            text = "Base stats:",
+            fontSize = 20.sp,
+            color = MaterialTheme.colors.onSurface
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+
+        for(i in pokemonInfo.stats.indices) {
+            val stat = pokemonInfo.stats[i]
+            PokeStat(
+                statName = parseStatToAbbr(stat),
+                statValue = stat.baseStat,
+                statMaxValue = maxBaseStat,
+                statColor = parseStatToColor(stat),
+                animDelay = i * animDelayPerItem
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+        }
     }
 }
 
