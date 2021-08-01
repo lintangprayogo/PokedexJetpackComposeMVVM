@@ -10,6 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navArgument
 import androidx.navigation.compose.rememberNavController
+import com.lintang.pokedexjetpackcomposemvvm.pokedetail.PokeDetailPage
 import com.lintang.pokedexjetpackcomposemvvm.pokelist.PokeListPage
 import com.lintang.pokedexjetpackcomposemvvm.ui.theme.PokedexJetpackComposeMVVMTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -40,8 +41,12 @@ class MainActivity : ComponentActivity() {
                         }
                         val pokemonName = remember {
                             it.arguments?.getString("pokemonName")
-
                         }
+                        PokeDetailPage(
+                            name = pokemonName ?: "-",
+                            dominantColor = dominantColor,
+                            navController = navController
+                        )
                     }
                 }
             }

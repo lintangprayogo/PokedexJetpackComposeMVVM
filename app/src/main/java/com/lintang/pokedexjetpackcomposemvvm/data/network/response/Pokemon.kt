@@ -24,7 +24,7 @@ data class Pokemon(
     @SerializedName("past_types")
     val pastTypes: List<Any>,
     val species: Species,
-    val sprites: Sprites,
+    val sprites: Sprites?,
     val stats: List<Stat>,
     val types: List<Type>,
     val weight: Int

@@ -40,9 +40,8 @@ import com.lintang.pokedexjetpackcomposemvvm.data.models.PokeEntry
 import com.lintang.pokedexjetpackcomposemvvm.ui.theme.RobotoCondensed
 
 
-
 @Composable
-fun PokeListPage(navController: NavController,viewModel: PokeListViewModel= hiltViewModel()) {
+fun PokeListPage(navController: NavController, viewModel: PokeListViewModel = hiltViewModel()) {
 
 
     Surface(color = MaterialTheme.colors.background, modifier = Modifier.fillMaxSize()) {
@@ -71,7 +70,7 @@ fun PokeListPage(navController: NavController,viewModel: PokeListViewModel= hilt
                     .padding(16.dp)
                     .align(CenterHorizontally), hint = "Type.."
             ) {
-          viewModel.searchPokemon(query = it)
+                viewModel.searchPokemon(query = it)
             }
             Spacer(modifier = Modifier.height(16.dp))
             PokeList(navController = navController)
@@ -101,7 +100,7 @@ fun SearchBar(modifier: Modifier, hint: String, onSearch: (String) -> Unit = {})
                 .background(Color.White, CircleShape)
                 .padding(horizontal = 20.dp, vertical = 12.dp)
                 .onFocusChanged {
-                    isHintDisplayed = !it.isFocused && text.isBlank()
+                    isHintDisplayed = !it.isFocused || text.isBlank()
                 },
             textStyle = TextStyle(color = Color.Black)
         )
@@ -121,25 +120,25 @@ fun SearchBar(modifier: Modifier, hint: String, onSearch: (String) -> Unit = {})
 
 @ExperimentalCoilApi
 @Composable
-fun PokeList(  navController: NavController,viewModel: PokeListViewModel= hiltViewModel()){
+fun PokeList(navController: NavController, viewModel: PokeListViewModel = hiltViewModel()) {
 
-    val  entries by remember {viewModel.pokeList}
-    val  isEnd  by remember {viewModel.isEnd}
-    val  isLoad by remember { viewModel.isLoad }
-    val  loadError by remember {viewModel.loadError}
-    val  isSearching by remember { viewModel.isSearching }
+    val entries by remember { viewModel.pokeList }
+    val isEnd by remember { viewModel.isEnd }
+    val isLoad by remember { viewModel.isLoad }
+    val loadError by remember { viewModel.loadError }
+    val isSearching by remember { viewModel.isSearching }
 
-    LazyColumn(contentPadding = PaddingValues(16.dp),state = rememberLazyListState(),){
-          val itemCount = if(entries.size%2==0){
-              entries.size/2
-          }else {
-              entries.size/2+1
-          }
-        items (itemCount){
-            if(it >=itemCount-1 && !isEnd && !isLoad && !isSearching){
+    LazyColumn(contentPadding = PaddingValues(16.dp), state = rememberLazyListState()) {
+        val itemCount = if (entries.size % 2 == 0) {
+            entries.size / 2
+        } else {
+            entries.size / 2 + 1
+        }
+        items(itemCount) {
+            if (it >= itemCount - 1 && !isEnd && !isLoad && !isSearching) {
                 viewModel.getPokemons()
             }
-            PokedexContent(rowIndex = it, entries = entries , navController =navController)
+            PokedexContent(rowIndex = it, entries = entries, navController = navController)
 
         }
     }
@@ -148,10 +147,10 @@ fun PokeList(  navController: NavController,viewModel: PokeListViewModel= hiltVi
         contentAlignment = Center,
         modifier = Modifier.fillMaxSize()
     ) {
-        if(isLoad) {
+        if (isLoad) {
             CircularProgressIndicator(color = MaterialTheme.colors.surface)
         }
-        if(loadError.isNotEmpty()) {
+        if (loadError.isNotEmpty()) {
             RetrySection(error = loadError) {
                 viewModel.getPokemons()
             }
@@ -166,13 +165,20 @@ fun PokedexEntry(
     navController: NavController,
     modifier: Modifier,
     viewModel: PokeListViewModel = hiltViewModel(),
+    callback: (Color) -> Unit
 
 ) {
 
     val defaultDominantColor = MaterialTheme.colors.surface
     var dominantColor by remember {
-        mutableStateOf(defaultDominantColor)
+        if (pokeEntry.color != null) {
+            mutableStateOf(pokeEntry.color!!)
+        } else {
+            mutableStateOf(defaultDominantColor)
+        }
+
     }
+
 
     Box(
         contentAlignment = Center,
@@ -193,17 +199,17 @@ fun PokedexEntry(
             }
     ) {
         Column {
-             Image(
+            Image(
                 painter = rememberImagePainter(
                     data = pokeEntry.imageUrl,
                     builder = {
-                        error(R.drawable.ic_error)
-                        data(pokeEntry.imageUrl)
+                        crossfade(true)
                         placeholder(R.drawable.ic_pokeball)
-                        transformations(object: Transformation {
+                        transformations(object : Transformation {
                             override fun key(): String {
                                 return pokeEntry.imageUrl
                             }
+
                             override suspend fun transform(
                                 pool: BitmapPool,
                                 input: Bitmap,
@@ -211,10 +217,12 @@ fun PokedexEntry(
                             ): Bitmap {
                                 viewModel.calcDominantColor(input) { color ->
                                     dominantColor = color
+                                    callback(color)
                                 }
                                 return input
                             }
                         })
+
                     }
                 ),
                 contentDescription = pokeEntry.name,
@@ -237,21 +245,25 @@ fun PokedexEntry(
 
 @ExperimentalCoilApi
 @Composable
-fun PokedexContent(rowIndex:Int,entries:List< PokeEntry>,navController: NavController) = Column {
+fun PokedexContent(rowIndex: Int, entries: List<PokeEntry>, navController: NavController) = Column {
     Row {
         PokedexEntry(
             pokeEntry = entries[rowIndex * 2],
             navController = navController,
             modifier = Modifier.weight(1f)
-        )
+        ) {
+            entries.get(rowIndex * 2).color = it
+        }
         Spacer(modifier = Modifier.width(16.dp))
-        if(entries.size >= rowIndex * 2 + 2) {
+        if (entries.size >= rowIndex * 2 + 2) {
             PokedexEntry(
                 pokeEntry = entries[rowIndex * 2 + 1],
                 navController = navController,
                 modifier = Modifier.weight(1f),
 
-            )
+                ) {
+                entries.get(rowIndex * 2 + 1).color = it
+            }
         } else {
             Spacer(modifier = Modifier.weight(1f))
         }

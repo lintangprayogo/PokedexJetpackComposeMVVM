@@ -19,74 +19,74 @@ import javax.inject.Inject
 @HiltViewModel
 class PokeListViewModel @Inject constructor(private val repo: PokeRepo) : ViewModel() {
 
-    private  var curPage=0
-    var pokeList= mutableStateOf<List<PokeEntry>>(listOf())
+    private var curPage = 0
+    var pokeList = mutableStateOf<List<PokeEntry>>(listOf())
     var loadError = mutableStateOf("")
-    var  isLoad   = mutableStateOf(false)
+    var isLoad = mutableStateOf(false)
     var isEnd = mutableStateOf(false)
 
     private var cachedList = listOf<PokeEntry>()
-    private var isSearchStarting= true
-    var isSearching= mutableStateOf(false)
+    private var isSearchStarting = true
+    var isSearching = mutableStateOf(false)
 
-   init {
-       getPokemons()
-   }
+    init {
+        getPokemons()
+    }
 
-    fun searchPokemon(query:String)=viewModelScope.launch {
-             val listOfSearch=if(isSearchStarting){
-                 pokeList.value
-             }else {
-                 cachedList
-             }
+    fun searchPokemon(query: String) = viewModelScope.launch {
+        val listOfSearch = if (isSearchStarting) {
+            pokeList.value
+        } else {
+            cachedList
+        }
 
-         viewModelScope.launch(Dispatchers.Default) {
-            val  results = listOfSearch.filter {
-                it.name.contains(query.trim(),ignoreCase = true)||it.number.toString()==query
+        viewModelScope.launch(Dispatchers.Default) {
+            val results = listOfSearch.filter {
+                it.name.contains(query.trim(), ignoreCase = true) || it.number.toString() == query
             }
-             if(isSearchStarting){
-                 cachedList=pokeList.value
-                 isSearchStarting=false
-             }
+            if (isSearchStarting) {
+                cachedList = pokeList.value
+                isSearchStarting = false
+            }
 
-             pokeList.value=results
-             isSearching.value=true
-         }
-
+            pokeList.value = results
+            isSearching.value = true
+        }
 
 
     }
-    fun  getPokemons()= viewModelScope.launch {
-        isLoad.value=true
-        val result =repo.getPokemons(limit = PAGE_SIZE,offset = curPage* PAGE_SIZE)
-        when(result){
-            is  Resource.Error->{
-                loadError.value=result.throwable?.localizedMessage?:"Unknown Error"
-                isLoad.value=false
+
+    fun getPokemons() = viewModelScope.launch {
+        isLoad.value = true
+        val result = repo.getPokemons(limit = PAGE_SIZE, offset = curPage * PAGE_SIZE)
+        when (result) {
+            is Resource.Error -> {
+                loadError.value = result.throwable?.localizedMessage ?: "Unknown Error"
+                isLoad.value = false
             }
 
-            is  Resource.Success->{
-                val data= result.data
-                if(data!=null){
+            is Resource.Success -> {
+                val data = result.data
+                if (data != null) {
                     isEnd.value = curPage * PAGE_SIZE >= result.data.count
-                    val entries =data.results.mapIndexed { _, item ->
-                        val number=if(item.url.endsWith("/")){
+                    val entries = data.results.mapIndexed { _, item ->
+                        val number = if (item.url.endsWith("/")) {
                             item.url.dropLast(1).takeLastWhile { it.isDigit() }
-                        }else {
+                        } else {
                             item.url.takeLastWhile { it.isDigit() }
                         }
-                        val imgUrl="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${number}.png"
-                        PokeEntry(item.name,imgUrl,number.toInt())
+                        val imgUrl =
+                            "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${number}.png"
+                        PokeEntry(item.name, imgUrl, number.toInt())
                     }
                     curPage++
-                    loadError.value=""
-                    isLoad.value=false
-                    pokeList.value+=entries
+                    loadError.value = ""
+                    isLoad.value = false
+                    pokeList.value += entries
 
-                }
-                else {
-                    loadError.value="Unknown Error"
-                    isLoad.value=false
+                } else {
+                    loadError.value = "Unknown Error"
+                    isLoad.value = false
                 }
             }
             else -> {
@@ -95,6 +95,7 @@ class PokeListViewModel @Inject constructor(private val repo: PokeRepo) : ViewMo
         }
 
     }
+
     fun calcDominantColor(bitmap: Bitmap, onFinish: (Color) -> Unit) {
         val bmp = bitmap.copy(Bitmap.Config.ARGB_8888, true)
 
