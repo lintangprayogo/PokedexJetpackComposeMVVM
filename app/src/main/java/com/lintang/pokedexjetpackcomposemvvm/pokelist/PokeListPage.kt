@@ -23,6 +23,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
@@ -30,9 +31,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import coil.annotation.ExperimentalCoilApi
-import coil.bitmap.BitmapPool
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import coil.size.Size
 import coil.transform.Transformation
 import com.lintang.pokedexjetpackcomposemvvm.R
@@ -118,7 +118,6 @@ fun SearchBar(modifier: Modifier, hint: String, onSearch: (String) -> Unit = {})
 
 }
 
-@ExperimentalCoilApi
 @Composable
 fun PokeList(navController: NavController, viewModel: PokeListViewModel = hiltViewModel()) {
 
@@ -158,7 +157,6 @@ fun PokeList(navController: NavController, viewModel: PokeListViewModel = hiltVi
     }
 }
 
-@ExperimentalCoilApi
 @Composable
 fun PokedexEntry(
     pokeEntry: PokeEntry,
@@ -200,18 +198,17 @@ fun PokedexEntry(
     ) {
         Column {
             Image(
-                painter = rememberImagePainter(
-                    data = pokeEntry.imageUrl,
-                    builder = {
-                        crossfade(true)
-                        placeholder(R.drawable.ic_pokeball)
-                        transformations(object : Transformation {
-                            override fun key(): String {
-                                return pokeEntry.imageUrl
-                            }
+                painter = rememberAsyncImagePainter(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(pokeEntry.imageUrl)
+                        .crossfade(true)
+                        .placeholder(R.drawable.ic_pokeball)
+                        .allowHardware(false)
+                        .transformations(object : Transformation {
+                            override val cacheKey: String
+                                get() = pokeEntry.imageUrl
 
                             override suspend fun transform(
-                                pool: BitmapPool,
                                 input: Bitmap,
                                 size: Size
                             ): Bitmap {
@@ -222,8 +219,7 @@ fun PokedexEntry(
                                 return input
                             }
                         })
-
-                    }
+                        .build()
                 ),
                 contentDescription = pokeEntry.name,
                 modifier = Modifier
@@ -243,7 +239,6 @@ fun PokedexEntry(
 }
 
 
-@ExperimentalCoilApi
 @Composable
 fun PokedexContent(rowIndex: Int, entries: List<PokeEntry>, navController: NavController) = Column {
     Row {

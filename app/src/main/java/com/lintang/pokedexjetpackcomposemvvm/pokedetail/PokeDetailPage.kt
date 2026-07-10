@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
 import com.lintang.pokedexjetpackcomposemvvm.R
 import com.lintang.pokedexjetpackcomposemvvm.data.network.response.Pokemon
 import com.lintang.pokedexjetpackcomposemvvm.data.network.response.Type
@@ -95,7 +95,7 @@ fun PokeDetailPage(
             if (pokemonInfo is Resource.Success) {
                 pokemonInfo.data?.sprites?.let {
                     Image(
-                        painter = rememberImagePainter(data = it.other.officialArtwork.frontDefault),
+                        painter = rememberAsyncImagePainter(model = it.other.officialArtwork.frontDefault),
                         contentDescription = pokemonInfo.data.name,
                         modifier = Modifier
                             .size(imageSize)
