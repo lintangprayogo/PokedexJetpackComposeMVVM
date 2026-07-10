@@ -1,7 +1,7 @@
 package com.lintang.pokedexjetpackcomposemvvm.di
 
 
-import com.lintang.pokedexjetpackcomposemvvm.data.network.PokeApi
+import com.lintang.pokedexjetpackcomposemvvm.data.remote.PokeApi
 import com.lintang.pokedexjetpackcomposemvvm.repo.PokeRepo
 import com.lintang.pokedexjetpackcomposemvvm.util.Constant.BASE_URL
 import dagger.Module

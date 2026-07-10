@@ -1,8 +1,8 @@
-package com.lintang.pokedexjetpackcomposemvvm.data.network
+package com.lintang.pokedexjetpackcomposemvvm.data.remote
 
 
-import com.lintang.pokedexjetpackcomposemvvm.data.network.response.PokeList
-import com.lintang.pokedexjetpackcomposemvvm.data.network.response.Pokemon
+import com.lintang.pokedexjetpackcomposemvvm.data.remote.response.PokeList
+import com.lintang.pokedexjetpackcomposemvvm.data.remote.response.Pokemon
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query

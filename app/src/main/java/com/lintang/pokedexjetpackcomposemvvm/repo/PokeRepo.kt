@@ -1,8 +1,8 @@
 package com.lintang.pokedexjetpackcomposemvvm.repo
 
-import com.lintang.pokedexjetpackcomposemvvm.data.network.PokeApi
-import com.lintang.pokedexjetpackcomposemvvm.data.network.response.PokeList
-import com.lintang.pokedexjetpackcomposemvvm.data.network.response.Pokemon
+import com.lintang.pokedexjetpackcomposemvvm.data.remote.PokeApi
+import com.lintang.pokedexjetpackcomposemvvm.data.remote.response.PokeList
+import com.lintang.pokedexjetpackcomposemvvm.data.remote.response.Pokemon
 import com.lintang.pokedexjetpackcomposemvvm.util.Resource
 import dagger.hilt.android.scopes.ActivityScoped
 import javax.inject.Inject

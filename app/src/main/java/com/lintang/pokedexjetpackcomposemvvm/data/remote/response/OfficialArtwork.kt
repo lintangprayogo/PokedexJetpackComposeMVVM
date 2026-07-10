@@ -1,4 +1,4 @@
-package com.lintang.pokedexjetpackcomposemvvm.data.network.response
+package com.lintang.pokedexjetpackcomposemvvm.data.remote.response
 
 
 import com.google.gson.annotations.SerializedName

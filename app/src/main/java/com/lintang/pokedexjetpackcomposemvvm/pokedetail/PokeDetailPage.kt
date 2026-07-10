@@ -31,8 +31,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.lintang.pokedexjetpackcomposemvvm.R
-import com.lintang.pokedexjetpackcomposemvvm.data.network.response.Pokemon
-import com.lintang.pokedexjetpackcomposemvvm.data.network.response.Type
+import com.lintang.pokedexjetpackcomposemvvm.data.remote.response.Pokemon
+import com.lintang.pokedexjetpackcomposemvvm.data.remote.response.Type
 import com.lintang.pokedexjetpackcomposemvvm.util.Resource
 import com.lintang.pokedexjetpackcomposemvvm.util.parseStatToAbbr
 import com.lintang.pokedexjetpackcomposemvvm.util.parseStatToColor

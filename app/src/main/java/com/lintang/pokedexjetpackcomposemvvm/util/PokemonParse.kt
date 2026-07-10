@@ -1,8 +1,8 @@
 package com.lintang.pokedexjetpackcomposemvvm.util
 
 import androidx.compose.ui.graphics.Color
-import com.lintang.pokedexjetpackcomposemvvm.data.network.response.Stat
-import com.lintang.pokedexjetpackcomposemvvm.data.network.response.Type
+import com.lintang.pokedexjetpackcomposemvvm.data.remote.response.Stat
+import com.lintang.pokedexjetpackcomposemvvm.data.remote.response.Type
 import com.lintang.pokedexjetpackcomposemvvm.ui.theme.*
 import java.util.*
 
